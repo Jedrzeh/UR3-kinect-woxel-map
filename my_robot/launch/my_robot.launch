@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="limited" default="false"/>
+  <arg name="model" default="$(find my_robot)/urdf/my_robot.urdf.xacro"/>
+
+ 
+  <include file="$(find my_robot)/gazebo_models/my_world.launch"/>
+<!-- include robot UR3 and 2 kinects -->
+ <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.0" respawn="false" output="screen" />
+<!--ur3 controler -->
+<include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
+
+  <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur3.yaml" command="load"/>
+  <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
+
+<!-- transtormation for both kinects  -0.707 0.0 0.0 0.707 -->
+<node pkg="tf" type="static_transform_publisher" name="prawy_tf" args="-0.2 0.9 0.3 -0.2706 0.65328 -0.65328 0.2706 base_link prawy_camera_depth_optical_frame 500" />
+
+<node pkg="tf" type="static_transform_publisher" name="front_tf" args="-0.2 -0.9 0.3 -0.653 0.270 -0.270 0.654 base_link front_camera_depth_optical_frame 500" />
+<!-- push cloudpoints from both kinects into one topic --> 
+<node pkg="topic_tools" type="relay" name="prawy_c" args="/prawy_camera/prawy_depth/points common_cloud" />
+<node pkg="topic_tools" type="relay" name="front_c" args="/front_camera/front_depth/points common_cloud" />
+
+
+<!-- launchinh octomap for kinects 
+ <include file="$(find my_robot)/launch/octo_map.launch"/>-->
+
+<!-- launching moveit! -->
+<include file="$(find ur3_moveit_config)/launch/ur3_moveit_planning_execution.launch" >
+<arg name="sim" default="true" />
+<arg name="limited" default="true"/>
+
+
+
+<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find my_robot)/launch/my_robot_rviz.rviz"/> -->
+
+</include>
+
+</launch>

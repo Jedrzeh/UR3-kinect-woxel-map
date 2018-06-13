@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="ur3" >
+
+  <!-- common stuff -->
+  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
+
+  <!-- ur3 -->
+  <xacro:include filename="$(find ur_description)/urdf/ur3.urdf.xacro" />
+
+  <!-- arm -->
+  <xacro:ur3_robot prefix="" joint_limited="false"/>
+
+  <link name="world" />
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link = "base_link" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint>
+  
+ 
+   <!-- common stuff -->
+
+ <xacro:include filename="$(find kinect_description)/urdf/kinect.urdf.xacro" />
+
+	<kinect name="prawy" xyz= "-0.2 0.9  0.3" rpy= "0.0 0.0 -0.785" parent_frame="world"/>
+ 	<kinect name="front" xyz= "-0.2 -0.9 0.3" rpy= "0.0 0.0  0.785 " parent_frame="world"/>
+ 
+	
+</robot>
